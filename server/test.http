@@ -1,0 +1,7 @@
+POST http://localhost:5000/api/compare
+Content-Type: application/json
+
+{
+  "textA": "The quick brown fox jumps over the lazy dog. Machine learning is changing how we build software. I enjoy walking on the beach every morning.",
+  "textB": "A quick brown fox jumps over a lazy dog. Machine learning is changing how we build software today. Cooking pasta requires boiling water and good salt."
+}

@@ -36,7 +36,35 @@ function App() {
 
       <button onClick={handleCompare}>Compare</button>
 
-      {result && <pre>{JSON.stringify(result, null, 2)}</pre>}
+
+      {result && (
+  <div style={{ marginTop: 20 }}>
+    <h2>Similarity: {result.overallAinB}%</h2>
+    <div style={{ background: '#444', borderRadius: 6, height: 20 }}>
+      <div
+        style={{
+          width: `${result.overallAinB}%`,
+          background: result.overallAinB >= 50 ? '#e5484d' : '#30a46c',
+          height: '100%',
+          borderRadius: 6,
+        }}
+      />
+    </div>
+
+    <h3>Matched sentences ({result.pairs.length})</h3>
+    {result.pairs.map((pair, i) => (
+      <div
+        key={i}
+        style={{ border: '1px solid #666', borderRadius: 6, padding: 10, marginBottom: 10 }}
+      >
+        <p><strong>A:</strong> {pair.aText}</p>
+        <p><strong>B:</strong> {pair.bText}</p>
+        <p>Score: {pair.score}</p>
+      </div>
+    ))}
+  </div>
+)}
+
     </div>
   );
 }

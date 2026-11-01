@@ -89,16 +89,16 @@ export async function compareDocs(textA, textB, threshold = 0.6, semanticThresho
     const semFlag = best.semantic >= semanticThreshold;
 
     if (lexFlag || semFlag) {
-      // "exact" if the lexical match is the stronger evidence, otherwise "semantic"
-      const useLexical = lexFlag && (!semFlag || best.lexical >= best.semantic);
-      const j = useLexical ? best.lexIndex : best.semIndex;
-      pairs.push({
-        aText: sentenceA,
-        bText: sentencesB[j],
-        score: Number((useLexical ? best.lexical : best.semantic).toFixed(2)),
-        type: useLexical ? 'exact' : 'semantic',
-      });
-    }
+  // "exact" if the wording itself is very similar, otherwise "semantic"
+  const isExact = best.lexical >= 0.8;
+  const j = isExact || !semFlag ? best.lexIndex : best.semIndex;
+  pairs.push({
+    aText: sentenceA,
+    bText: sentencesB[j],
+    score: Number((isExact ? best.lexical : Math.max(best.semantic, best.lexical)).toFixed(2)),
+    type: isExact ? 'exact' : 'semantic',
+  });
+}
   });
 
   const overallAinB = sentencesA.length

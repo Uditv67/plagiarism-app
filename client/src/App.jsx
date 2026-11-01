@@ -115,6 +115,7 @@ function App() {
   <div style={{ border: '2px solid #f5d90a', borderRadius: 6, padding: 10, marginBottom: 20 }}>
     <p><strong>Matching sentence in B:</strong> {selected.bText}</p>
     <p>Score: {selected.score}</p>
+    <p>Type: {selected.type}</p>
   </div>
 )}
 
@@ -127,6 +128,7 @@ function App() {
         <p><strong>A:</strong> {pair.aText}</p>
         <p><strong>B:</strong> {pair.bText}</p>
         <p>Score: {pair.score}</p>
+        <p>Type: {pair.type}</p>
       </div>
     ))}
   </div>

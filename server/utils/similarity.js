@@ -1,3 +1,5 @@
+import { embed, cosineVec } from './embed.js';
+
 export function splitSentences(text) {
   return text
     .split(/(?<=[.?!])\s+/)
@@ -56,34 +58,45 @@ export function cosine(a, b) {
 }
 
 
-export function compareDocs(textA, textB, threshold = 0.5) {
+export async function compareDocs(textA, textB, threshold = 0.6, semanticThreshold = 0.6) {
   const sentencesA = splitSentences(textA);
   const sentencesB = splitSentences(textB);
 
-  // build vectors over ALL sentences together so both documents share the same IDF
+  // lexical vectors (TF-IDF), built over all sentences together
   const vectors = buildVectors([...sentencesA, ...sentencesB]);
   const vectorsA = vectors.slice(0, sentencesA.length);
   const vectorsB = vectors.slice(sentencesA.length);
 
+  // semantic vectors (embeddings)
+  const embA = [];
+  for (const s of sentencesA) embA.push(await embed(s));
+  const embB = [];
+  for (const s of sentencesB) embB.push(await embed(s));
+
   const pairs = [];
 
-  vectorsA.forEach((vecA, i) => {
-    let bestScore = 0;
-    let bestIndex = -1;
+  sentencesA.forEach((sentenceA, i) => {
+    let best = { lexical: 0, semantic: 0, lexIndex: -1, semIndex: -1 };
 
-    vectorsB.forEach((vecB, j) => {
-      const score = cosine(vecA, vecB);
-      if (score > bestScore) {
-        bestScore = score;
-        bestIndex = j;
-      }
+    sentencesB.forEach((_, j) => {
+      const lex = cosine(vectorsA[i], vectorsB[j]);
+      const sem = cosineVec(embA[i], embB[j]);
+      if (lex > best.lexical) { best.lexical = lex; best.lexIndex = j; }
+      if (sem > best.semantic) { best.semantic = sem; best.semIndex = j; }
     });
 
-    if (bestScore >= threshold) {
+    const lexFlag = best.lexical >= threshold;
+    const semFlag = best.semantic >= semanticThreshold;
+
+    if (lexFlag || semFlag) {
+      // "exact" if the lexical match is the stronger evidence, otherwise "semantic"
+      const useLexical = lexFlag && (!semFlag || best.lexical >= best.semantic);
+      const j = useLexical ? best.lexIndex : best.semIndex;
       pairs.push({
-        aText: sentencesA[i],
-        bText: sentencesB[bestIndex],
-        score: Number(bestScore.toFixed(2)),
+        aText: sentenceA,
+        bText: sentencesB[j],
+        score: Number((useLexical ? best.lexical : best.semantic).toFixed(2)),
+        type: useLexical ? 'exact' : 'semantic',
       });
     }
   });

@@ -33,7 +33,7 @@ app.post(
         return res.status(400).json({ error: 'Both documents are required' });
       }
 
-      const result = compareDocs(textA, textB);
+      const result = await compareDocs(textA, textB);
       res.json({ ...result, textA, textB });
     } catch (err) {
       console.error(err);

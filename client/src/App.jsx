@@ -5,20 +5,33 @@ function App() {
   const [textB, setTextB] = useState('');
   const [result, setResult] = useState(null);
   const [selected, setSelected] = useState(null);
+  const [fileA, setFileA] = useState(null);
+  const [fileB, setFileB] = useState(null);
 
   async function handleCompare() {
-    setSelected(null);
-    const response = await fetch('http://localhost:5000/api/compare', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ textA, textB }),
-    });
-    const data = await response.json();
-    setResult(data);
+  setSelected(null);
+
+  const formData = new FormData();
+  formData.append('textA', textA);
+  formData.append('textB', textB);
+  if (fileA) formData.append('fileA', fileA);
+  if (fileB) formData.append('fileB', fileB);
+
+  const response = await fetch('http://localhost:5000/api/compare', {
+    method: 'POST',
+    body: formData,
+  });
+  const data = await response.json();
+
+  if (data.error) {
+    alert(data.error);
+    return;
   }
+  setResult(data);
+}
 
   function renderHighlighted() {
-  let remaining = textA;
+  let remaining = result.textA;
   const parts = [];
 
   result.pairs.forEach((pair, i) => {
@@ -64,6 +77,8 @@ function App() {
         value={textA}
         onChange={(e) => setTextA(e.target.value)}
       />
+      <input type="file" accept=".pdf,.docx,.txt" onChange={(e) => setFileA(e.target.files[0])} />
+
       <textarea
         rows={8}
         style={{ width: '100%', marginBottom: 10 }}
@@ -71,7 +86,9 @@ function App() {
         value={textB}
         onChange={(e) => setTextB(e.target.value)}
       />
+      <input type="file" accept=".pdf,.docx,.txt" onChange={(e) => setFileB(e.target.files[0])} />
 
+      <br />
       <button onClick={handleCompare}>Compare</button>
 
 

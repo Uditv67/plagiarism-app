@@ -4,8 +4,10 @@ function App() {
   const [textA, setTextA] = useState('');
   const [textB, setTextB] = useState('');
   const [result, setResult] = useState(null);
+  const [selected, setSelected] = useState(null);
 
   async function handleCompare() {
+    setSelected(null);
     const response = await fetch('http://localhost:5000/api/compare', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -14,6 +16,42 @@ function App() {
     const data = await response.json();
     setResult(data);
   }
+
+  function renderHighlighted() {
+  let remaining = textA;
+  const parts = [];
+
+  result.pairs.forEach((pair, i) => {
+    const index = remaining.indexOf(pair.aText);
+    if (index === -1) return;
+
+    // plain text before the match
+    parts.push(<span key={'t' + i}>{remaining.slice(0, index)}</span>);
+
+    // the highlighted match
+    parts.push(
+      <mark
+        key={'m' + i}
+        onClick={() => setSelected(pair)}
+        style={{
+          background: '#f5d90a',
+          color: '#000',
+          cursor: 'pointer',
+          padding: '0 2px',
+          borderRadius: 3,
+        }}
+      >
+        {pair.aText}
+      </mark>
+    );
+
+    remaining = remaining.slice(index + pair.aText.length);
+  });
+
+  // plain text after the last match
+  parts.push(<span key="end">{remaining}</span>);
+  return parts;
+}
 
   return (
     <div style={{ maxWidth: 900, margin: '0 auto', padding: 20 }}>
@@ -50,6 +88,18 @@ function App() {
         }}
       />
     </div>
+
+    <h3>Document A (matches highlighted)</h3>
+<div style={{ whiteSpace: 'pre-wrap', lineHeight: 1.7, marginBottom: 10 }}>
+  {renderHighlighted()}
+</div>
+
+{selected && (
+  <div style={{ border: '2px solid #f5d90a', borderRadius: 6, padding: 10, marginBottom: 20 }}>
+    <p><strong>Matching sentence in B:</strong> {selected.bText}</p>
+    <p>Score: {selected.score}</p>
+  </div>
+)}
 
     <h3>Matched sentences ({result.pairs.length})</h3>
     {result.pairs.map((pair, i) => (

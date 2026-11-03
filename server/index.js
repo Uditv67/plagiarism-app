@@ -3,6 +3,8 @@ import cors from 'cors';
 import { compareDocs } from './utils/similarity.js';
 import multer from 'multer';
 import { extractText } from './utils/extract.js';
+import 'dotenv/config';
+import mongoose from 'mongoose';
 
 const app = express();
 
@@ -41,6 +43,11 @@ app.post(
     }
   }
 );
+
+mongoose
+  .connect(process.env.MONGO_URI)
+  .then(() => console.log('MongoDB connected'))
+  .catch((err) => console.error('MongoDB connection failed:', err.message));
 
 app.listen(5000, () => {
     console.log('server running on port 5000');

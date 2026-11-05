@@ -5,6 +5,7 @@ import multer from 'multer';
 import { extractText } from './utils/extract.js';
 import 'dotenv/config';
 import mongoose from 'mongoose';
+import Report from './models/Report.js';
 
 const app = express();
 
@@ -36,6 +37,11 @@ app.post(
       }
 
       const result = await compareDocs(textA, textB);
+      try {
+        await Report.create({ ...result, textA, textB });
+      } catch (dbErr) {
+      console.error('Could not save report:', dbErr.message);
+      }
       res.json({ ...result, textA, textB });
     } catch (err) {
       console.error(err);

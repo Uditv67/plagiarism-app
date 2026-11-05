@@ -49,7 +49,7 @@ function App() {
         key={'m' + i}
         onClick={() => setSelected(pair)}
         style={{
-          background: '#f5d90a',
+          background: pair.type === 'exact' ? '#ff6b6b' : '#ffa94d',
           color: '#000',
           cursor: 'pointer',
           padding: '0 2px',
@@ -121,6 +121,11 @@ useEffect(() => {
         }}
       />
     </div>
+
+    <p>
+  <span style={{ background: '#ff6b6b', color: '#000', padding: '0 6px', borderRadius: 3 }}>exact</span>{' '}
+  <span style={{ background: '#ffa94d', color: '#000', padding: '0 6px', borderRadius: 3 }}>semantic</span>
+</p>
 
     <h3>Document A (matches highlighted)</h3>
 <div style={{ whiteSpace: 'pre-wrap', lineHeight: 1.7, marginBottom: 10 }}>

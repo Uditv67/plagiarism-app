@@ -9,6 +9,7 @@ paraphrased sentences using TF-IDF cosine similarity and MiniLM sentence embeddi
 - Semantic matching (MiniLM embeddings via Transformers.js) for paraphrasing
 - Sentence-level highlighting with exact / semantic labels
 - Works regardless of sentence order
+- Saves every comparison to MongoDB and shows a history list
 
 ## Screenshots
 
@@ -25,7 +26,7 @@ paraphrased sentences using TF-IDF cosine similarity and MiniLM sentence embeddi
 ![Evaluation](screenshots/evaluation.png)
 
 ## Tech stack
-React (Vite), Node.js, Express, Transformers.js, multer, pdf-parse, mammoth
+React (Vite), Node.js, Express, Transformers.js, multer, pdf-parse, mammoth, MongoDB(Atlas), Mongoose
 
 ## How it works
 1. Each document is split into sentences.
@@ -62,11 +63,25 @@ Paragraph tests (9-sentence document):
 - Flags for human review; it does not prove plagiarism
 
 ## Run locally
+
+1. Create a free MongoDB Atlas cluster and copy its connection string.
+2. Create a file `server/.env` with one line (never commit this file):
+
+```
+MONGO_URI=mongodb+srv://USERNAME:PASSWORD@cluster0.xxxxx.mongodb.net/plagiarism
+```
+
+3. Start the server:
 ```bash
 cd server && npm install && node index.js
+```
+4. Start the client:
+```bash
 cd client && npm install && npm run dev
 ```
-Open http://localhost:5173 (the first run downloads the MiniLM model, about 25 MB).
+5. Open http://localhost:5173 (the first run downloads the MiniLM model, about 25 MB).
+
+
 
 ## Future scope
 Activity logger, MongoDB history, batch compare, Kafka/Spark streaming

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 function App() {
   const [textA, setTextA] = useState('');
@@ -7,6 +7,7 @@ function App() {
   const [selected, setSelected] = useState(null);
   const [fileA, setFileA] = useState(null);
   const [fileB, setFileB] = useState(null);
+  const [history, setHistory] = useState([]);
 
   async function handleCompare() {
   setSelected(null);
@@ -28,6 +29,7 @@ function App() {
     return;
   }
   setResult(data);
+  loadHistory();
 }
 
   function renderHighlighted() {
@@ -65,6 +67,20 @@ function App() {
   parts.push(<span key="end">{remaining}</span>);
   return parts;
 }
+
+async function loadHistory() {
+  try {
+    const response = await fetch('http://localhost:5000/api/reports');
+    const data = await response.json();
+    setHistory(data);
+  } catch (err) {
+    console.error('Could not load history', err);
+  }
+}
+
+useEffect(() => {
+  loadHistory();
+}, []);
 
   return (
     <div style={{ maxWidth: 900, margin: '0 auto', padding: 20 }}>
@@ -133,7 +149,16 @@ function App() {
     ))}
   </div>
 )}
-
+    <h3 style={{ marginTop: 30 }}>History</h3>
+{history.length === 0 && <p>No saved comparisons yet.</p>}
+{history.map((h) => (
+  <div
+    key={h._id}
+    style={{ border: '1px solid #666', borderRadius: 6, padding: 8, marginBottom: 6 }}
+  >
+    {new Date(h.createdAt).toLocaleString()} : similarity {h.overallAinB}%
+  </div>
+))}
     </div>
   );
 }

@@ -55,6 +55,19 @@ mongoose
   .then(() => console.log('MongoDB connected'))
   .catch((err) => console.error('MongoDB connection failed:', err.message));
 
+app.get('/api/reports', async (req, res) => {
+  try {
+    const reports = await Report.find()
+      .sort({ createdAt: -1 })
+      .limit(20)
+      .select('overallAinB createdAt');
+    res.json(reports);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Could not load reports' });
+  }
+});
+
 app.listen(5000, () => {
     console.log('server running on port 5000');
 });

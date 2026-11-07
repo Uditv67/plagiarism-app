@@ -8,6 +8,11 @@ function App() {
   const [fileA, setFileA] = useState(null);
   const [fileB, setFileB] = useState(null);
   const [history, setHistory] = useState([]);
+  const [page, setPage] = useState('compare');
+  const [writeText, setWriteText] = useState('');
+const [events, setEvents] = useState([]);
+const [startTime] = useState(() => Date.now());
+const [behavior, setBehavior] = useState(null);
 
   async function handleCompare() {
   setSelected(null);
@@ -82,10 +87,37 @@ useEffect(() => {
   loadHistory();
 }, []);
 
+useEffect(() => {
+  function onVisibility() {
+    if (document.hidden) logEvent('tab_switch');
+  }
+  document.addEventListener('visibilitychange', onVisibility);
+  return () => document.removeEventListener('visibilitychange', onVisibility);
+}, []);
+
+function logEvent(type, extra = {}) {
+  setEvents((prev) => [...prev, { type, t: Date.now() - startTime, ...extra }]);
+}
+
+async function handleSubmitWriting() {
+  const response = await fetch('http://localhost:5000/api/activity', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ text: writeText, events }),
+  });
+  const data = await response.json();
+  setBehavior(data);
+}
+
   return (
     <div style={{ maxWidth: 900, margin: '0 auto', padding: 20 }}>
       <h1>Plagiarism Detector</h1>
-
+      <div style={{ marginBottom: 15 }}>
+  <button onClick={() => setPage('compare')}>Compare</button>{' '}
+  <button onClick={() => setPage('write')}>Write</button>
+</div>
+    {page === 'compare' && (
+  <div>
       <textarea
         rows={8}
         style={{ width: '100%', marginBottom: 10 }}
@@ -164,6 +196,32 @@ useEffect(() => {
     {new Date(h.createdAt).toLocaleString()} : similarity {h.overallAinB}%
   </div>
 ))}
+    </div>
+)}
+{page === 'write' && (
+  <div>
+    <h2>Write</h2>
+    <p style={{ fontSize: 13, opacity: 0.7 }}>
+      Typing activity (pastes, deletions, tab switches) is recorded for review.
+    </p>
+    <textarea
+      rows={12}
+      style={{ width: '100%' }}
+      placeholder="Write your assignment here"
+      value={writeText}
+      onChange={(e) => setWriteText(e.target.value)}
+      onPaste={(e) =>
+        logEvent('paste', { length: e.clipboardData.getData('text').length })
+      }
+      onKeyDown={(e) =>
+        logEvent(e.key === 'Backspace' || e.key === 'Delete' ? 'delete' : 'key')
+      }
+    />
+    <p>Events recorded: {events.length}</p>
+    <button onClick={handleSubmitWriting}>Submit</button>
+{behavior && <pre>{JSON.stringify(behavior, null, 2)}</pre>}
+  </div>
+)}
     </div>
   );
 }

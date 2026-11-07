@@ -68,6 +68,16 @@ app.get('/api/reports', async (req, res) => {
   }
 });
 
+app.post('/api/activity', (req, res) => {
+  const { text, events } = req.body;
+
+  if (typeof text !== 'string' || !Array.isArray(events)) {
+    return res.status(400).json({ error: 'text and events are required' });
+  }
+
+  res.json({ received: events.length, chars: text.length });
+});
+
 app.listen(5000, () => {
     console.log('server running on port 5000');
 });

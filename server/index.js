@@ -6,6 +6,8 @@ import { extractText } from './utils/extract.js';
 import 'dotenv/config';
 import mongoose from 'mongoose';
 import Report from './models/Report.js';
+import { scoreBehavior } from './utils/behavior.js';
+import Activity from './models/Activity.js';
 
 const app = express();
 
@@ -68,14 +70,26 @@ app.get('/api/reports', async (req, res) => {
   }
 });
 
-app.post('/api/activity', (req, res) => {
+app.post('/api/activity', async (req, res) => {
   const { text, events } = req.body;
 
   if (typeof text !== 'string' || !Array.isArray(events)) {
     return res.status(400).json({ error: 'text and events are required' });
   }
 
-  res.json({ received: events.length, chars: text.length });
+  const result = {
+    received: events.length,
+    chars: text.length,
+    ...scoreBehavior(text, events),
+  };
+
+  try {
+    await Activity.create({ text, events, result });
+  } catch (dbErr) {
+    console.error('Could not save activity:', dbErr.message);
+  }
+
+  res.json(result);
 });
 
 app.listen(5000, () => {

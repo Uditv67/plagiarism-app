@@ -219,7 +219,46 @@ async function handleSubmitWriting() {
     />
     <p>Events recorded: {events.length}</p>
     <button onClick={handleSubmitWriting}>Submit</button>
-{behavior && <pre>{JSON.stringify(behavior, null, 2)}</pre>}
+{behavior && (
+  <div style={{ marginTop: 20 }}>
+    <h3>Behavior risk: {behavior.score} / 100</h3>
+    <div style={{ background: '#444', borderRadius: 6, height: 20 }}>
+      <div
+        style={{
+          width: `${behavior.score}%`,
+          background:
+            behavior.score >= 50 ? '#e5484d' : behavior.score >= 25 ? '#ffa94d' : '#30a46c',
+          height: '100%',
+          borderRadius: 6,
+        }}
+      />
+    </div>
+
+    <h4>Why</h4>
+    {behavior.reasons.length === 0 ? (
+      <p>No unusual behavior detected.</p>
+    ) : (
+      <ul>
+        {behavior.reasons.map((r, i) => (
+          <li key={i}>{r}</li>
+        ))}
+      </ul>
+    )}
+
+    <h4>Details</h4>
+    <ul>
+      <li>Pasted share of text: {Math.round(behavior.pasteRatio * 100)}%</li>
+      <li>Typing speed: {behavior.speed} keys/second</li>
+      <li>Deletions: {Math.round(behavior.deleteRatio * 100)}% of keystrokes</li>
+      <li>Tab switches: {behavior.tabs}</li>
+      <li>Events recorded: {behavior.received}</li>
+    </ul>
+
+    <p style={{ fontSize: 13, opacity: 0.7 }}>
+      This score is advice for a human reviewer, not proof of plagiarism.
+    </p>
+  </div>
+)}
   </div>
 )}
     </div>

@@ -10,6 +10,7 @@ paraphrased sentences using TF-IDF cosine similarity and MiniLM sentence embeddi
 - Sentence-level highlighting with exact / semantic labels
 - Works regardless of sentence order
 - Saves every comparison to MongoDB and shows a history list
+- Writing page that records pastes, typing speed, deletions and tab switches, and gives a rule-based behavior risk score with reasons
 
 ## Screenshots
 
@@ -61,6 +62,7 @@ Paragraph tests (9-sentence document):
 - Heavy paraphrasing can be missed: in a fully reworded paragraph, 7 of 9 sentences were detected
 - Compares only the two documents given, not the web
 - Flags for human review; it does not prove plagiarism
+- Behavior thresholds are untuned starting values, and the logger only sees activity inside this app’s editor
 
 ## Run locally
 
